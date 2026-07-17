@@ -81,6 +81,19 @@ pub fn process_text_node(
                 return;
             }
             if !output.ends_with("\n\n") {
+                // A whitespace-only node nested in an inline wrapper still
+                // represents a word separator. Its sibling tags may belong to
+                // the wrapper's parent, so sibling lookup from this text node
+                // alone cannot detect them.
+                let parent_is_inline = dom_ctx
+                    .parent_tag_name(node_handle.get_inner(), parser)
+                    .is_some_and(is_inline_element);
+                if ctx.inline_depth > 0 || ctx.convert_as_inline || parent_is_inline {
+                    if !output.ends_with(' ') && !output.ends_with('\n') {
+                        output.push(' ');
+                    }
+                    return;
+                }
                 if let Some(next_tag) = get_next_sibling_tag(node_handle, parser, dom_ctx) {
                     if is_inline_element(next_tag) {
                         if !output.ends_with(' ') && !output.ends_with('\n') {

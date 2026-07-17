@@ -43,7 +43,6 @@ pub fn handle(
     let needs_leading_sep = !ctx.in_table_cell
         && !ctx.in_list_item
         && !ctx.convert_as_inline
-        && ctx.blockquote_depth == 0
         && !output.is_empty()
         && !output.ends_with("\n\n")
         && !after_code_block;
@@ -55,7 +54,14 @@ pub fn handle(
         add_list_continuation_indent(output, ctx.list_depth, true, options);
     } else if needs_leading_sep {
         crate::converter::trim_trailing_whitespace(output);
-        output.push_str("\n\n");
+        if ctx.blockquote_depth > 0 {
+            // Blockquotes are assembled in a temporary buffer and prefixed
+            // line-by-line later. One newline separates adjacent block nodes
+            // without introducing an empty quoted line.
+            output.push('\n');
+        } else {
+            output.push_str("\n\n");
+        }
     }
 
     let p_ctx = Context {

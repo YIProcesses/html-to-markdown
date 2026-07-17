@@ -270,12 +270,8 @@ fn test_table_with_link_and_image_no_rows() {
 // ~keep ==============================================================================
 // ~keep Comprehensive tests for <br> tags in table cells
 // ~keep ==============================================================================
-// ~keep These tests cover the issue where literal <br> HTML tags were being output
-// ~keep in table cells instead of being converted to proper Markdown line breaks.
-// ~keep
-// ~keep ISSUE: When br_in_tables option is enabled, <br> tags in table cells should
-// ~keep be converted to proper Markdown line breaks (spaces-style: "  \n" or
-// ~keep backslash-style: "\\\n") rather than being output as literal "<br>" tags.
+// ~keep Physical newlines split Markdown table rows. When br_in_tables is enabled,
+// ~keep explicit HTML breaks must remain inline as literal <br> elements.
 
 #[test]
 fn test_br_in_table_cell_basic_spaces_style() {
@@ -291,14 +287,8 @@ fn test_br_in_table_cell_basic_spaces_style() {
     let result = convert(html, Some(options)).unwrap();
 
     assert!(
-        result.contains("Line 1  \nLine 2") || result.contains("Line 1  <br>Line 2"),
-        "Expected spaces-style line break in table cell: {result}"
-    );
-    let has_literal_br = result.contains("<br>");
-    let properly_converted = result.contains("Line 1  \nLine 2");
-    assert!(
-        has_literal_br || properly_converted,
-        "Should either have literal <br> (bug) or proper break: {result}"
+        result.contains("Line 1<br>Line 2"),
+        "Expected an inline HTML break in the table cell: {result}"
     );
 }
 
@@ -317,8 +307,8 @@ fn test_br_in_table_cell_backslash_style() {
     let result = convert(html, Some(options)).unwrap();
 
     assert!(
-        result.contains("Line 1\\\nLine 2") || result.contains("Line 1\\<br>Line 2"),
-        "Expected backslash-style line break in table cell: {result}"
+        result.contains("Line 1<br>Line 2"),
+        "Expected an inline HTML break: {result}"
     );
 }
 

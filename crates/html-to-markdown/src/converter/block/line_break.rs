@@ -1,7 +1,7 @@
 //! Handler for line break elements (br).
 //!
 //! Converts HTML line break tags to Markdown line breaks using the configured
-//! newline style (spaces, backslash, or plain newline).
+//! newline style, or to literal `<br>` inside table cells when requested.
 
 use crate::converter::main_helpers::trim_trailing_whitespace;
 use crate::options::{ConversionOptions, NewlineStyle};
@@ -80,7 +80,11 @@ pub fn handle(
         }
     }
 
-    if ctx.in_heading {
+    if ctx.in_table_cell && options.br_in_tables {
+        // Physical newlines split a Markdown table row. Keep the break inside
+        // the cell as inline HTML so the resulting table remains valid.
+        output.push_str("<br>");
+    } else if ctx.in_heading {
         trim_trailing_whitespace(output);
         output.push_str("  ");
     } else if output.is_empty() || output.ends_with('\n') {
