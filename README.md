@@ -1,3 +1,15 @@
+# fork info
+
+This is a fork of version 3.8.3 addressing the following issues:
+
+- https://github.com/xberg-io/html-to-markdown/issues/429
+- https://github.com/xberg-io/html-to-markdown/issues/430
+- https://github.com/xberg-io/html-to-markdown/issues/431
+- https://github.com/xberg-io/html-to-markdown/issues/432
+- https://github.com/xberg-io/html-to-markdown/issues/433
+- https://github.com/xberg-io/html-to-markdown/issues/434
+
+
 <p align="center">
   <picture>
     <source media="(prefers-color-scheme: dark)" srcset="https://cdn.jsdelivr.net/gh/xberg-io/assets@v1/banner/readme-banner-dark.svg">
