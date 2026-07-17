@@ -27,6 +27,9 @@ jobs:
           - os: ubuntu-latest
             platform: linux-x86_64
             library: libhtml_to_markdown_ffi.so
+          - os: ubuntu-24.04-arm
+            platform: linux-aarch64
+            library: libhtml_to_markdown_ffi.so
           - os: windows-latest
             platform: windows-x86_64
             library: html_to_markdown_ffi.dll
@@ -87,9 +90,12 @@ jobs:
         run: |
           rm -rf packages/java/src/main/resources/natives
           mkdir -p packages/java/src/main/resources/natives/linux-x86_64
+          mkdir -p packages/java/src/main/resources/natives/linux-aarch64
           mkdir -p packages/java/src/main/resources/natives/windows-x86_64
           cp native-artifacts/java-native-linux-x86_64/libhtml_to_markdown_ffi.so \
             packages/java/src/main/resources/natives/linux-x86_64/
+          cp native-artifacts/java-native-linux-aarch64/libhtml_to_markdown_ffi.so \
+            packages/java/src/main/resources/natives/linux-aarch64/
           cp native-artifacts/java-native-windows-x86_64/html_to_markdown_ffi.dll \
             packages/java/src/main/resources/natives/windows-x86_64/
 
@@ -109,8 +115,10 @@ jobs:
             -DnewVersion="$PACKAGE_VERSION" -DgenerateBackupPoms=false
           mvn -f packages/java/pom.xml package -DskipTests \
             -Dclassifier=yi-package -Dcheckstyle.skip=true -Dpmd.skip=true -Dcpd.skip=true
-          jar tf "packages/java/target/html-to-markdown-${PACKAGE_VERSION}-yi-package.jar" \
-            | grep -E 'natives/(linux|windows)-x86_64/.*\.(so|dll)$'
+          jar tf "packages/java/target/html-to-markdown-${PACKAGE_VERSION}-yi-package.jar" > jar-contents.txt
+          grep -Fx 'natives/linux-x86_64/libhtml_to_markdown_ffi.so' jar-contents.txt
+          grep -Fx 'natives/linux-aarch64/libhtml_to_markdown_ffi.so' jar-contents.txt
+          grep -Fx 'natives/windows-x86_64/html_to_markdown_ffi.dll' jar-contents.txt
 
       - name: Publish to GitHub Packages
         shell: bash
