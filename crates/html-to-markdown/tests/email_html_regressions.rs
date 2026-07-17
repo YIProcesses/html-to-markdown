@@ -51,3 +51,23 @@ fn explicit_br_in_table_uses_literal_html_break_when_enabled() {
 
     assert_eq!(markdown, "| First line<br>Second line | Other |\n| --- | --- |");
 }
+
+#[test]
+fn styled_br_between_styled_spans_preserves_line_break() {
+    let span_with_plain_br = convert_tier2(
+        "<div><span style=\"font-size:13px\">First</span><br><span style=\"font-size:13px\">Second</span></div>",
+        |_| {},
+    );
+    let text_with_styled_br = convert_tier2(
+        "<div>First<br style=\"font-size:13px\">Second</div>",
+        |_| {},
+    );
+    let span_with_styled_br = convert_tier2(
+        "<div><span style=\"font-size:13px\">First</span><br style=\"font-size:13px\"><span style=\"font-size:13px\">Second</span></div>",
+        |_| {},
+    );
+
+    assert_eq!(span_with_plain_br, "First  \nSecond", "plain br between spans");
+    assert_eq!(text_with_styled_br, "First  \nSecond", "styled br between text");
+    assert_eq!(span_with_styled_br, "First  \nSecond", "styled br between spans");
+}

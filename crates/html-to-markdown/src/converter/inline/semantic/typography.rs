@@ -406,6 +406,8 @@ pub fn handle_span(
         && options.whitespace_mode == crate::options::WhitespaceMode::Normalized
         && output.ends_with('\n')
         && !output.ends_with("\n\n")
+        && !output.ends_with("  \n")
+        && !output.ends_with("\\\n")
     {
         output.pop();
     }
