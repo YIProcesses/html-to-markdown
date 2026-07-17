@@ -112,7 +112,13 @@ pub fn handle_img(
         }
     }
 
-    let keep_as_markdown = ctx.in_heading && ctx.heading_allow_inline_images;
+    let keep_as_markdown = (ctx.in_heading && ctx.heading_allow_inline_images)
+        || has_kept_inline_image_ancestor(
+            node_handle,
+            parser,
+            dom_ctx,
+            &ctx.keep_inline_images_in,
+        );
 
     let should_use_alt_text =
         !keep_as_markdown && (ctx.convert_as_inline || (ctx.in_heading && !ctx.heading_allow_inline_images));
@@ -214,6 +220,29 @@ pub fn handle_img(
         let alt_opt = if alt.is_empty() { None } else { Some(alt.as_ref()) };
         sc.borrow_mut().push_image(src_opt, alt_opt);
     }
+}
+
+pub(crate) fn has_kept_inline_image_ancestor(
+    node_handle: &tl::NodeHandle,
+    parser: &tl::Parser,
+    dom_ctx: &DomContext,
+    keep_inline_images_in: &std::collections::HashSet<String>,
+) -> bool {
+    if keep_inline_images_in.is_empty() {
+        return false;
+    }
+
+    let mut parent = dom_ctx.parent_of(node_handle.get_inner());
+    while let Some(parent_id) = parent {
+        if dom_ctx
+            .tag_info(parent_id, parser)
+            .is_some_and(|info| keep_inline_images_in.contains(info.name.as_str()))
+        {
+            return true;
+        }
+        parent = dom_ctx.parent_of(parent_id);
+    }
+    false
 }
 
 /// Format an image as Markdown syntax.
